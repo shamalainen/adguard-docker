@@ -1,0 +1,40 @@
+version: '3.7'
+
+services:
+  adguard-home:
+    image: adguard/adguardhome
+    container_name: "adguard-home"
+    hostname: "dns.docker.sh"
+    restart: unless-stopped
+    dns:
+      - 1.1.1.1
+      - 1.0.0.1
+    ports:
+      - '53:53/tcp'
+      - '53:53/udp'
+      - '67:67/udp'
+      # - '68:68/tcp'
+      # - '68:68/udp'
+      # - '80:80/tcp'
+      #- '443:443/tcp'
+      - '8053:80/tcp'
+      - '853:853/tcp'
+      - '5000:3000/tcp'
+    volumes:
+      - './work:/opt/adguardhome/work'
+      - './conf:/opt/adguardhome/conf'
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.adguard-home.entrypoints=https"
+      - "traefik.http.routers.adguard-home.rule=Host(`${DRUPAL_HOSTNAME}`)"
+      - "traefik.http.routers.adguard-home.tls=true"
+      - "traefik.http.services.adguard-home.loadbalancer.server.port=8080"
+      - "traefik.docker.network=stonehenge-network"
+    networks:
+      - internal
+      - stonehenge-network
+networks:
+  internal:
+    external: false
+  stonehenge-network:
+    external: true
